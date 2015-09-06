@@ -96,7 +96,7 @@ Result createTable(char *tableName, TableInfo *tableInfo)
 	}
 
     /* 出来上がったpageをwritePageでファイル[tableName].defの0ページ目に記録する */
-	writePage(file, 0, page);
+	writePage(file, 0, p);
 
     /* [tableName].defをクローズする */
 	closeFile(file);
