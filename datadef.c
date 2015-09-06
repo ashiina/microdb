@@ -24,6 +24,7 @@
  */
 Result initializeDataDefModule()
 {
+	return OK;
 }
 
 /*
@@ -37,6 +38,7 @@ Result initializeDataDefModule()
  */
 Result finalizeDataDefModule()
 {
+	return OK;
 }
 
 /*
@@ -62,9 +64,9 @@ Result createTable(char *tableName, TableInfo *tableInfo)
 	char page[PAGE_SIZE];
 	char *p;
 	int i;
-
+	char *filename;
     /* [tableName].defという文字列を作る */
-	char *filename = getFileNameFromTableName(tableName);
+	getFileNameFromTableName(&filename, tableName);
 
     /* [tableName].defというファイルを作る */
 	if (createFile(filename) != OK) 
@@ -114,7 +116,8 @@ Result createTable(char *tableName, TableInfo *tableInfo)
  */
 Result dropTable(char *tableName)
 {
-	char *filename = getFileNameFromTableName(tableName);
+	char *filename;
+	getFileNameFromTableName(&filename, tableName);
 	return deleteFile(filename);
 }
 
@@ -137,8 +140,9 @@ TableInfo *getTableInfo(char *tableName)
 	TableInfo *tableInfo;
 	File *file;
 	char page[PAGE_SIZE];
+	char *filename;
 
-	char *filename = getFileNameFromTableName(tableName);
+	getFileNameFromTableName(&filename, tableName);
 	if ((file = openFile(filename)) == NULL) 
 	{
 	}
@@ -147,6 +151,7 @@ TableInfo *getTableInfo(char *tableName)
 	readPage(file, 0, page);
 
 	// TODO how to parse page into tableInfo? 
+	
 
 	return tableInfo;
 }
@@ -168,14 +173,65 @@ void freeTableInfo(TableInfo *tableInfo)
 {
 }
 
-char *getFileNameFromTableName (char *tableName)
+void getFileNameFromTableName (char **filename, char *tableName)
 {
 	int len;
-	char *filename;
-	/* [tableName].defという文字列を作る */
-	len = strlen(tableName) + strlen(DEF_FILE_EXT);
-	snprintf(filename, len, "%s%s", tableName, DEF_FILE_EXT);
-	return filename;
+	len = strlen(tableName) + strlen(DEF_FILE_EXT)+1;
+	*filename = malloc(len);
+	snprintf(*filename, len, "%s%s", tableName, DEF_FILE_EXT);
 }
+
+/*
+ * printTableInfo -- テーブルのデータ定義情報を表示する(動作確認用)
+ *
+ * 引数:
+ *	tableName: 情報を表示するテーブルの名前
+ *
+ * 返り値:
+ *	なし
+ */
+void printTableInfo(char *tableName)
+{
+    TableInfo *tableInfo;
+    int i;
+
+    /* テーブル名を出力 */
+    printf("\nTable %s\n", tableName);
+
+    /* テーブルの定義情報を取得する */
+    if ((tableInfo = getTableInfo(tableName)) == NULL) {
+	/* テーブル情報の取得に失敗したので、処理をやめて返る */
+	return;
+    }
+
+    /* フィールド数を出力 */
+    printf("number of fields = %d\n", tableInfo->numField);
+
+    /* フィールド情報を読み取って出力 */
+    for (i = 0; i < tableInfo->numField; i++) {
+	/* フィールド名の出力 */
+	printf("  field %d: name = %s, ", i + 1, tableInfo->fieldInfo[i].name);
+
+	/* データ型の出力 */
+	printf("data type = ");
+	switch (tableInfo->fieldInfo[i].dataType) {
+	case TYPE_INTEGER:
+	    printf("integer\n");
+	    break;
+	case TYPE_STRING:
+	    printf("string\n");
+	    break;
+	default:
+	    printf("unknown\n");
+	}
+    }
+
+    /* データ定義情報を解放する */
+    freeTableInfo(tableInfo);
+
+    return;
+}
+
+
 
 

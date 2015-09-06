@@ -40,17 +40,6 @@ extern Result writePage(File *, int, char *);
 extern int getNumPages(char *);
 
 /*
- * datadef.cに定義されている関数群
- */
-extern Result initializeDataDefModule();
-extern Result finalizeDataDefModule();
-extern Result createTable(char *, TableInfo *);
-extern Result dropTable(char *);
-extern TableInfo *getTableInfo(char *);
-extern void freeTableInfo(TableInfo *);
-char *getFileNameFromTableName (char *);
-
-/*
  * MAX_FIELD -- 1レコードに含まれるフィールド数の上限
  */
 #define MAX_FIELD 40
@@ -87,5 +76,18 @@ struct TableInfo {
     int numField; /* フィールド数 */
     FieldInfo fieldInfo[MAX_FIELD]; /* フィールド情報の配列 */
 };
+
+/*
+ * datadef.cに定義されている関数群
+ */
+extern Result initializeDataDefModule();
+extern Result finalizeDataDefModule();
+extern Result createTable(char *, TableInfo *);
+extern Result dropTable(char *);
+extern TableInfo *getTableInfo(char *);
+extern void freeTableInfo(TableInfo *);
+void getFileNameFromTableName (char **, char *);
+void printTableInfo(char *tableName);
+
 
 
